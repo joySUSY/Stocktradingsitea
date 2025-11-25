@@ -1,0 +1,17 @@
+{
+  "name": "stock-dashboard-api",
+  "version": "1.0.0",
+  "description": "股票盯盘系统 - API服务",
+  "main": "api/stock/search.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": ">=14.x"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
