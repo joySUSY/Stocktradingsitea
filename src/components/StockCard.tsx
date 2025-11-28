@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { PredictionMeter } from './PredictionMeter';
 import { EditOwnedStockModal } from './EditOwnedStockModal';
+import { MiniTrendChart } from './MiniTrendChart';
 import { Stock, getPredictionLabel, getPredictionColor } from '../utils/stockUtils';
 
 interface StockCardProps {
@@ -165,16 +166,22 @@ export function StockCard({ stock, onClick, onAIClick, onRemove, onEdit, ownedDe
             </div>
           </div>
 
+          {/* Trend Chart - 趋势图 */}
+          <div className="pt-2 border-t border-border">
+            <div className="text-sm text-muted-foreground mb-2">今日走势</div>
+            <MiniTrendChart isPositive={isPositive} />
+          </div>
+
           {/* Additional Stats */}
           {!ownedDetails && (
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
               <div>
                 <span className="text-sm text-muted-foreground block">成交量</span>
-                <div className="font-medium">{stock.volume}</div>
+                <div className="font-medium">{stock.volume || '-'}</div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground block">市盈率</span>
-                <div className="font-medium">{stock.pe}</div>
+                <div className="font-medium">{stock.pe ? stock.pe.toFixed(2) : '-'}</div>
               </div>
             </div>
           )}

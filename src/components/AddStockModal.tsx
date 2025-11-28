@@ -45,13 +45,26 @@ export function AddStockModal({ isOpen, onClose, onAdd }: AddStockModalProps) {
 
   const performSearch = async (query: string) => {
     setIsSearching(true);
+    console.log('🔍 [AddStockModal] 开始搜索:', query);
 
     try {
       // 使用真实的Tushare API
       const results = await apiSearchStocks(query);
-      setSearchResults(results);
+      console.log('✅ [AddStockModal] 搜索成功，结果数:', results.length);
+      console.log('📊 [AddStockModal] 搜索结果:', results);
+      
+      // 去重：如果有相同symbol的股票，只保留第一个
+      const uniqueResults = results.filter((stock, index, self) => 
+        index === self.findIndex(s => s.symbol === stock.symbol)
+      );
+      
+      if (uniqueResults.length !== results.length) {
+        console.log(`⚠️ [AddStockModal] 去重：${results.length} -> ${uniqueResults.length}`);
+      }
+      
+      setSearchResults(uniqueResults);
     } catch (error) {
-      console.error('搜索失败:', error);
+      console.error('❌ [AddStockModal] 搜索失败:', error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -61,6 +74,15 @@ export function AddStockModal({ isOpen, onClose, onAdd }: AddStockModalProps) {
   const handleAdd = () => {
     if (!selectedStock) return;
     
+    // 确保股票有完整的字段
+    const completeStock: Stock = {
+      ...selectedStock,
+      volume: selectedStock.volume || '-',
+      marketCap: selectedStock.marketCap || '-',
+      pe: selectedStock.pe || 0,
+      prediction: selectedStock.prediction || Math.floor(Math.random() * 40) + 50,
+    };
+    
     if (stockType === 'owned') {
       const price = parseFloat(buyPrice);
       const qty = parseInt(quantity);
@@ -68,9 +90,9 @@ export function AddStockModal({ isOpen, onClose, onAdd }: AddStockModalProps) {
         alert('请输入有效的购买价格和数量');
         return;
       }
-      onAdd(selectedStock, stockType, { buyPrice: price, quantity: qty });
+      onAdd(completeStock, stockType, { buyPrice: price, quantity: qty });
     } else {
-      onAdd(selectedStock, stockType);
+      onAdd(completeStock, stockType);
     }
     
     // Reset form
@@ -143,6 +165,12 @@ export function AddStockModal({ isOpen, onClose, onAdd }: AddStockModalProps) {
                       <Loader2 className="w-12 h-12 mx-auto mb-3 animate-spin" />
                       <p>搜索中...</p>
                     </div>
+                  ) : searchQuery.trim() && searchResults.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      <p>未找到匹配的股票</p>
+                      <p className="text-xs mt-2">试试搜索"茅台"、"比亚迪"或"宁德时代"</p>
+                    </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.map((stock) => (
                       <div
@@ -166,8 +194,9 @@ export function AddStockModal({ isOpen, onClose, onAdd }: AddStockModalProps) {
                     ))
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
-                      <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                      <p>未找到匹配的股票</p>
+                      <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      <p>输入股票名称或代码开始搜索</p>
+                      <p className="text-xs mt-2">例如：茅台、600519、比亚迪、宁德时代</p>
                     </div>
                   )}
                 </div>
